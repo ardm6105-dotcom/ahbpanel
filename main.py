@@ -1,5 +1,5 @@
 # ============================================================
-# ahbpanel 14.4.0
+# ahbpanel 14.5.0
 # Railway Ready
 # Created By Ahb
 # ============================================================
@@ -60,7 +60,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # ============================================================
 
 APP_NAME = "ahbpanel"
-APP_VERSION = "14.4.0"
+APP_VERSION = "14.5.0"
 
 SUPPORT_USERNAME = "@ahb_panel"
 SUPPORT_URL = "https://t.me/ahbpanel"
@@ -2203,7 +2203,7 @@ AHB Panel
 </div>
 
 <div class="version">
-14.4.0
+14.5.0
 </div>
 </div>
 
@@ -2251,7 +2251,7 @@ class="btn secondary"
 <div class="footer">
 
 <span>
-AHB Panel · 14.4.0
+AHB Panel · 14.5.0
 </span>
 
 <a
@@ -2470,7 +2470,7 @@ button.cta:hover{background-position:100% 0;filter:none;box-shadow:0 10px 32px r
       <div class="logo">P</div>
       <div>
         <div class="brand-name">AHB Panel</div>
-        <div class="brand-ver">14.4.0</div>
+        <div class="brand-ver">14.5.0</div>
       </div>
     </div>
 
@@ -2513,13 +2513,13 @@ button.cta:hover{background-position:100% 0;filter:none;box-shadow:0 10px 32px r
       </form>
     </div>
 
-    <div class="foot">AHB Panel · 14.4.0 · <a href="https://t.me/ahb_panel" target="_blank" rel="noopener">@ahb_panel</a></div>
+    <div class="foot">AHB Panel · 14.5.0 · <a href="https://t.me/ahb_panel" target="_blank" rel="noopener">@ahb_panel</a></div>
   </div>
 
   <div class="hero">
     <div class="wordmark">AHB</div>
     <div class="wm-sub">PANEL</div>
-    <div class="wm-ver">14.4.0</div>
+    <div class="wm-ver">14.5.0</div>
     <div class="slogan">آینده مدیریت سرور<br>از اینجا شروع می‌شود</div>
     <div class="chips">
       <div class="chip"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg>پایداری</div>
@@ -3442,7 +3442,7 @@ async def bulk_category(request: Request, _=Depends(require_auth)):
 async def update_link(
     uid: str,
     request: Request,
-    _=Depends(require_auth),
+    token=Depends(require_auth),
 ):
 
     try:
@@ -3458,6 +3458,13 @@ async def update_link(
             status_code=400,
             detail="اطلاعات نامعتبر است",
         )
+
+    # برای همه: نام، یادداشت، پورت و تنظیمات فنی فقط نمایشی هستند
+    for _k in (
+        "label", "note", "port",
+        "fingerprint", "alpn", "protocol", "fragment",
+    ):
+        body.pop(_k, None)
 
     async with LINKS_LOCK:
 
@@ -4897,7 +4904,7 @@ AHB Panel
 </h1>
 
 <div class="version">
-14.4.0
+14.5.0
 </div>
 
 <div class="text">
@@ -6301,7 +6308,7 @@ DASHBOARD_HTML = r"""
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>AHBPanel 14.4.0</title>
+<title>AHBPanel 14.5.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -6807,7 +6814,7 @@ html.light .toast{background:rgba(255,255,255,.88)}
     <div class="sb-logo-icon">AHB</div>
     <div class="sb-logo-text">
       <div class="sb-logo-name">AHBPanel</div>
-      <div class="sb-logo-ver">v14.4.0</div>
+      <div class="sb-logo-ver">v14.5.0</div>
     </div>
   </div>
   <nav class="nav">
@@ -7247,6 +7254,35 @@ html.light .toast{background:rgba(255,255,255,.88)}
   </div>
 </div>
 
+<!-- Edit config modal -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-title">ویرایش کانفیگ</div>
+    <input type="hidden" id="eUid">
+    <div style="font-size:12px;color:var(--t3);margin-bottom:12px">فقط حجم، روز، محدودیت IP، محدودیت اتصال و سرعت قابل ویرایش هستند؛ بقیه فقط نمایشی‌اند.</div>
+    <div class="field"><label>نام</label><input id="eName" maxlength="60"></div>
+    <div class="field"><label>یادداشت</label><input id="eNote" maxlength="500"></div>
+    <div class="form-row">
+      <div class="field"><label>محدودیت حجم (۰ = نامحدود)</label><input id="eLimit" type="number" min="0" step="any"></div>
+      <div class="field"><label>واحد</label><select id="eUnit"><option>GB</option><option>MB</option><option>KB</option></select></div>
+    </div>
+    <div class="field"><label>انقضا: چند روز از امروز (۰ = نامحدود، خالی = بدون تغییر)</label><input id="eDays" type="number" min="0" placeholder=""></div>
+    <div id="eExpInfo" style="font-size:12px;color:var(--t3);margin:-4px 0 12px"></div>
+    <div class="form-row">
+      <div class="field"><label>محدودیت IP</label><input id="eIp" type="number" min="0"></div>
+      <div class="field"><label>محدودیت اتصال</label><input id="eConn" type="number" min="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>سرعت (Mbps، ۰ = نامحدود)</label><input id="eSpeed" type="number" min="0" step="any"></div>
+      <div class="field"><label>پورت</label><input id="ePort" type="number" min="1" max="65535"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeEdit()">انصراف</button>
+      <button class="btn btn-p" id="eSaveBtn" onclick="saveEdit()">ذخیره</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="panelModal">
   <div class="modal">
     <div class="modal-title" id="panelModalTitle">...</div>
@@ -7452,6 +7488,7 @@ function renderLinks(arr){
         <button class="btn btn-sm" onclick="copySubById('${esc(uid)}')" title="Sub"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></button>
         <a class="btn btn-sm" href="/info/${esc(uid)}" target="_blank" title="INFO" style="text-decoration:none"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></a>
         <button class="btn btn-sm" onclick="resetUsage('${esc(uid)}')" title="Reset"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+        <button class="btn btn-sm" onclick="openEdit('${esc(uid)}')" title="${lang==='fa'?'ویرایش':'Edit'}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
         <button class="btn btn-sm btn-d" onclick="deleteLink('${esc(uid)}')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
       </td>
     </tr>`;
@@ -7717,6 +7754,54 @@ function filterConfigs(){
     const uid=String(l.uuid||l.id||'').toLowerCase();
     return name.includes(q)||proto.includes(q)||uid.includes(q);
   }));
+}
+function __bytesToLimit(b){
+  b=Number(b)||0;
+  if(b<=0)return {v:0,u:'GB'};
+  if(b>=1024**3)return {v:+(b/1024**3).toFixed(2),u:'GB'};
+  if(b>=1024**2)return {v:+(b/1024**2).toFixed(2),u:'MB'};
+  return {v:+(b/1024).toFixed(2),u:'KB'};
+}
+function openEdit(uid){
+  const l=(window.__linksMap||{})[uid];
+  if(!l){toast(lang==='fa'?'کانفیگ پیدا نشد':'Not found');return}
+  const lim=__bytesToLimit(l.limit_bytes);
+  const spd=l.speed_limit_bytes?+(Number(l.speed_limit_bytes)*8/1048576).toFixed(2):0;
+  const set=(id,v)=>{document.getElementById(id).value=v};
+  set('eUid',uid);
+  set('eName',l.label||l.name||'');
+  set('eNote',l.note||'');
+  set('eLimit',lim.v);
+  set('eUnit',lim.u);
+  set('eDays','');
+  set('eIp',Number(l.ip_limit)||0);
+  set('eConn',Number(l.connection_limit)||0);
+  set('eSpeed',spd);
+  set('ePort',l.port||'');
+  let exp=lang==='fa'?'انقضا: ندارد':'No expiry';
+  if(l.expires_at){try{exp=(lang==='fa'?'انقضای فعلی: ':'Current expiry: ')+new Date(l.expires_at).toLocaleDateString(lang==='fa'?'fa-IR':'en-US')}catch(e){}}
+  document.getElementById('eExpInfo').textContent=exp;
+  window.__editOrig={limit:String(lim.v),unit:lim.u,speed:String(spd),ip:String(Number(l.ip_limit)||0),conn:String(Number(l.connection_limit)||0),port:String(l.port||''),name:l.label||l.name||'',note:l.note||''};
+  ['eName','eNote','ePort'].forEach(id=>{document.getElementById(id).disabled=true});
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEdit(){document.getElementById('editModal').classList.remove('open')}
+document.getElementById('editModal').addEventListener('click',e=>{if(e.target.id==='editModal')closeEdit()});
+async function saveEdit(){
+  const uid=document.getElementById('eUid').value;
+  const o=window.__editOrig||{};
+  const g=id=>document.getElementById(id).value;
+  const body={};
+  if(g('eLimit')!==o.limit||g('eUnit')!==o.unit){body.limit_value=Number(g('eLimit'))||0;body.limit_unit=g('eUnit')}
+  if(g('eDays').trim()!=='')body.expires_days=Math.max(0,parseInt(g('eDays'),10)||0);
+  if(g('eIp')!==o.ip)body.ip_limit=Math.max(0,parseInt(g('eIp'),10)||0);
+  if(g('eConn')!==o.conn)body.connection_limit=Math.max(0,parseInt(g('eConn'),10)||0);
+  if(g('eSpeed')!==o.speed){body.speed_limit_value=Number(g('eSpeed'))||0;body.speed_limit_unit='MBIT'}
+  if(!Object.keys(body).length){closeEdit();return}
+  const btn=document.getElementById('eSaveBtn');btn.disabled=true;
+  const r=await api('/api/links/'+encodeURIComponent(uid),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  btn.disabled=false;
+  if(r!==null){closeEdit();toast(lang==='fa'?'ذخیره شد':'Saved');refreshAll()}
 }
 async function resetUsage(uid){
   if(!confirm(lang==='fa'?'مصرف ریست شود؟':'Reset usage?'))return;
