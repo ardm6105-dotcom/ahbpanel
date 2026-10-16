@@ -4,7 +4,7 @@
 
 **پنل مدیریت سریع، سبک و حرفه‌ای — آماده‌ی اجرا روی Railway**
 
-نسخه‌ی `14.6.0`
+نسخه‌ی `14.7.0`
 
 [![Telegram](https://img.shields.io/badge/Telegram-@ahbpanel-2CA5E0?logo=telegram&logoColor=white)](https://t.me/ahbpanel)
 
